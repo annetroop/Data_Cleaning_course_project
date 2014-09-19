@@ -6,13 +6,42 @@
 * Acceleration-X
 * Acceleration-Y
 * Acceleration-Z
+
 The overall acceleration sensed by the phone accelerometer in the given axis.
 
 ###GravityAcceleration
 * GravityAcceleration-X
 * GravityAcceleration-Y
 * GravityAcceleration-Z
+
 The amount of sensed acceleration attributable to gravity rather than the person.
+
+### AccelerationJerk 
+
+The derivative of Acceleration.
+
+### GyroValue 
+
+Angular velocity, 3-axial.
+
+### GyroJerk  
+
+The derivative of GyroValue.
+
+### MagnitudeOfBodyAcceleration 
+
+The Euclidean norm of the Body Acceleration, that is,  sqrt(x^2 + y^2 + z^2) where x, y, and z are the BodyAcceleration-X, BodyAcceleration-Y and BodyAcceleration-Z.
+
+### MagnitudeOfGravityAcceleration
+
+The Euclidean norm of the Gravity Acceleration.
+
+
+
+
+
+
+
 
 ## Activities
 
