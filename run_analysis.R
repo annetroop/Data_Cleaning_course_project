@@ -2,53 +2,58 @@
 # Step 1: Merge train and test into one data sets
 #
 
-setwd("C:\\coursera\\cleaning\\UCI HAR Dataset\\test")
-xtest <- read.table("X_test.txt")
-#is 2947 x 561
-ytest <- read.table("Y_test.txt")
-#is 2947 x 1 : For logistical regression, this would be the desired outputs
+setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
 
-# We should also attach the subject id to each row
-
-stest <- read.table("subject_test.txt")
-names(stest) <- c("subject_id")
-xtest <- cbind(stest, xtest)
-
-
-# Same for train data
-
-setwd("C:\\coursera\\cleaning\\UCI HAR Dataset\\train")
-
-xtrain <- read.table("X_train.txt")
-#is 7352 x 561
-ytrain <- read.table("Y_train.txt")
-#is 7352 x 1 
-
-# We should attach the subject id to each row in train, too
-
-strain <- read.table("subject_train.txt")
+# Read the train data
+xtrain <- read.table("train/X_train.txt")
+# is 7352 x 561
+# Attach the subject id to each row in train, too
+strain <- read.table("train/subject_train.txt")
 names(strain) <- c("subject_id")
 xtrain <- cbind(strain, xtrain)
 
+# Read the test data
+xtest <- read.table("test/X_test.txt")
+# is 2947 x 561
+# Attach the subject id to each row
+stest <- read.table("test/subject_test.txt")
+names(stest) <- c("subject_id")
+xtest <- cbind(stest, xtest)
 
-# Now let's put train and test together, completing Step 1
+# Now let's put train and test together
 xt <- rbind(xtrain, xtest)
+
+
+ytrain <- read.table("train/Y_train.txt")
+# is 7352 x 1 
+ytest <- read.table("test/Y_test.txt")
+# is 2947 x 1 
+# For logistical regression, this would be the desired outputs
 ytl <- rbind(ytrain, ytest)
-#We want y as a vector, and rbind has given us a data frame
+# We want y as a vector, but rbind has given us a data frame
+# so we need to de-list it.
 yt <- ytl[[1]]
+
+# Step 1 completed.
 # xt is 10299 x 562, yt is 10299 x 1
 
 
-
-# I considered reading in from
-# setwd("C:\\coursera\\cleaning\\UCI HAR Dataset\\test\\Inertial Signals")
-# but it looks like these are background, not needed in final tidy data set
-# They have already been used to produce the values in xt
-
 #
 # --------
-# Step 2: Take only the columns that are means or stddev
-# I grouped this together with
+# Step 2: Take only the columns that are mean or std deviation
+#
+
+f <- read.table("features.txt")
+
+# We really only want certain features,
+# those with -mean() or -std() in the name.
+# use is a list of the numbers of the columns of X 
+# that we want to use
+use <- sort(union(grep("-mean\\()", f[, 2]), grep("-std\\()", f[, 2])))
+
+
+
+
 # Step 4: Meaningful Column Names
 # because we need to look at the Column meanings to determine
 # what to keep for Step 2, so why not apply the variable/column names 
@@ -59,12 +64,10 @@ yt <- ytl[[1]]
 # and getting rid of punctuation, which doesn't 
 # make good column names
 
-setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
-f <- read.table("features.txt")
+
 clean <- rep(0, 561)
-use <- rep(0, 561)
 for (i in 1:561) {
-    # The unctuations we need to remove are parens and comma
+    # The punctuations we need to remove are parens and comma
     a        <- gsub("(", "", f[i,2], fixed = TRUE)
     b        <- gsub(")", "",  a, fixed = TRUE)
     c        <- gsub("-", ".", b, fixed = TRUE)
@@ -76,11 +79,6 @@ for (i in 1:561) {
 # The rest are the cleaned up names we made above
 colnames(xt) <- c("subject_id",clean)
 
-# However, we really only want certain columns,
-# those with mean or std in the name
-# use is a list of the numbers of the columns of xtest 
-# and xtrain that we want to use
-use <- sort(union(grep("mean", f[, 2]), grep("std", f[, 2])))
 
 # AMT -- LOOKUP regmatches
 # I really wanted to match on -mean(), which because -mean at 
