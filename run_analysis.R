@@ -52,7 +52,18 @@ f <- read.table("features.txt")
 use <- sort(union(grep("-mean\\()", f[, 2]), grep("-std\\()", f[, 2])))
 
 
+# All the rows have moved over 1 for subject, so, 
+# add 1 to everything in use
+use <- use + 1
 
+# In addition to the columns we just chose, we also want
+# to include the subjectId, column 1.
+xTrim <-xt[ ,c(1, use)]
+# We're trimming columns of xt, not rows, so we don't need to trim yt
+
+#Let's keep the feature names of the columns we used 
+used_f <- f[use,]
+n_used <- nrow(used_f)
 
 # Step 4: Meaningful Column Names
 # because we need to look at the Column meanings to determine
@@ -65,10 +76,10 @@ use <- sort(union(grep("-mean\\()", f[, 2]), grep("-std\\()", f[, 2])))
 # make good column names
 
 
-clean <- rep(0, 561)
-for (i in 1:561) {
+clean <- rep(0, n_used)
+for (i in 1:n_used) {
     # The punctuations we need to remove are parens and comma
-    a        <- gsub("(", "", f[i,2], fixed = TRUE)
+    a        <- gsub("(", "", used_f[i,2], fixed = TRUE)
     b        <- gsub(")", "",  a, fixed = TRUE)
     c        <- gsub("-", ".", b, fixed = TRUE)
     clean[i] <- gsub(",", "",  c, fixed = TRUE)
@@ -77,30 +88,9 @@ for (i in 1:561) {
 # Let's label our overall xt dataset
 # The first column is the subject_id we pasted on
 # The rest are the cleaned up names we made above
-colnames(xt) <- c("subject_id",clean)
+colnames(xt) <- c("subject_id",clean[use])
 
 
-# AMT -- LOOKUP regmatches
-# I really wanted to match on -mean(), which because -mean at 
-# the very end of the name, but grep treated $ like a fixed
-# despite fixed = FALSE 
-#m <- regexec("mean$",foobar)
-#regmatches(foobar, m)
-
-# All the rows have moved over 1 for subject, so, 
-# add 1 to everything in use
-use <- use + 1
-
-# In addition to the columns we just chose, we also want
-# to include the subjectId, column 1.
-xTrim <-xt[ ,c(1, use)]
-# We're trimming columns of xt, not rows, so we don't need to trim yt
-
-#we do not need to do this, having put names on xt already
-#LOOK UP: names vs colnames
-# names(xTrim) <- c("subject_id", clean[c(use)])
-
-#oh... should we just wait until here to add the rbind'ed subject_id's?
 
 #
 # --------
@@ -124,6 +114,10 @@ dataset <- cbind(xTrim, ytl, yt_desc)
 #We have now completed Step 1 - 4
 write.csv(dataset, "step4.csv")
 
+
+# Some things I tried that I don't think I'll be using 
+# but I'm not ready to throw away yet
+
 #ii <- interaction(dataset$subject_id, dataset$numericActivity)
 #s <- split(dataset,ii)
 numericDataset <- cbind(xTrim, ytl)
@@ -137,3 +131,18 @@ xX <- xtabs(tBodyAcc.mean.X ~ subject_id + Activity, data = dataset)
 colMeans(xX)
 xZ <- xtabs(tBodyAcc.mean.Z ~ subject_id + Activity, data = dataset)
 colMeans(xZ)
+
+
+
+#Step 5
+
+molten_data <- melt(dataset,id.vars=c("subject_id","Activity"))
+library(reshape)
+tidy_dataset <- cast(molten, variable  + Activity + subject_id ~ ., mean)
+write.csv(tidy_dataset, "tidy.csv")
+
+try_this <- cast(molten, variable ~ subject_id | Activity, mean)
+
+
+
+
