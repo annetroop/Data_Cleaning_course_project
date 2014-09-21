@@ -1,12 +1,18 @@
 # Code Book
 
+## Viewing the data
+
+You can view the tidy data set by saving it and reading it into R with:
+
+tidy <- read.table("tidy.txt", header=TRUE)
+View(tidy)
+
 ## Source of data
 
 The source of the underlying data was from 
 
 "Human Activity Recognition Using Smartphones Dataset
-Version 1.0
-==================================================================
+Version 1.0 by
 Jorge L. Reyes-Ortiz, Davide Anguita, Alessandro Ghio, Luca Oneto.
 Smartlab - Non Linear Complex Systems Laboratory
 DITEN - Università degli Studi di Genova.
@@ -16,7 +22,7 @@ www.smartlab.ws"
 
 Their README.txt is located in the "UCI HAR Dataset" zip file.
 
-The tidy data set presents the mean of specific variables of the original experiment which were themselves means or standard deviations of collections of accelerometer data from smart phones worn by volunteers while doing specific activities.  I encourage you to read their README.txt for full details of the data collection ans processing.
+The tidy data set presents the mean of specific variables of the original experiment which were themselves means or standard deviations of collections of accelerometer data from smart phones worn by volunteers while doing specific activities.  I encourage you to read their README.txt for full details of the data collection and processing.
 
 ## Variables
 
@@ -34,7 +40,7 @@ Variable is the name of one of the original measurement types which was already 
 
 ### mean(value)
 
-The fourth column in the data set is the mean value for the set of observations of variable for the given subject_id and activity. (Even if that's the mean of the standard deviation, such as for tBodyGyro.std.X.)
+The fourth column in the data set is the mean value for the set of observations of variable for the given subject_id and activity. (Even if that's the mean of a set of observed  standard deviations, for variables named with "std", such as for tBodyGyro.std.X.)
 
 ## Expanded commentary on the variables occurring in the "variable" column
 
