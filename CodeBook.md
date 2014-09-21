@@ -2,7 +2,7 @@
 
 ## Variables
 
-### Subject_id
+### subject_id
 
 Identifies which volunteer the data comes from.
 
@@ -10,14 +10,15 @@ Identifies which volunteer the data comes from.
 
 Identifies what physical activity the volunteer was performing at the time of these measurements.
 
-### Variables
+### variable
 
-Variable is the name of one of the original measurement types which was already a mean or standard deviation.  (I interpreted meanFreq to not be a mean of a measurement and did not include those.)  
+Variable is the name of one of the original measurement types which was already a mean or standard deviation.  (I interpreted meanFreq to not be a mean of a measurement and did not include those.) More discussion of these further down. 
 
 ### mean(value)
 
-The fourth
+The fourth column in the data set is the mean value for the set of observations of variable for the given subject_id and activity. (Even if that's the mean of the standard deviation, such as for tBodyGyro.std.X.)
 
+## Meanings of the variables occurring in the "variable" column
 
 ###Acceleration
 * Acceleration-X
