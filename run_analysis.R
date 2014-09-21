@@ -1,21 +1,25 @@
 library(dplyr)
 library(tidyr)
+library(reshape)
+
 #
-# Step 1: Merge train and test into one data sets
+# Step 1; Merges the training and the test sets to create one data set.
 #
 # I interpretted this to also be the right time to add
 # subject_id to each row
+#
+# I used capital X and lowercase y because this looks like logistical regression,
+# where X is a matrix and y is the outputs we hope to match
 #
 
 setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
 
 # Read the train data
-# is 7352 x 561
+# which is 7352 x 561
 xtrain <- read.table("train/X_train.txt")
-# Attach the subject id to each row in train, too
+
+# Attach the subject id to each row 
 strain <- read.table("train/subject_train.txt")
-
-
 names(strain) <- c("subject_id")
 xtrain <- cbind(strain, xtrain)
 
@@ -29,133 +33,108 @@ names(stest) <- c("subject_id")
 xtest <- cbind(stest, xtest)
 
 # Now let's put train and test together
-xt <- rbind(xtrain, xtest)
-
-X <- tbl_df(xt)
+X <- rbind(xtrain, xtest)
 
 ytrain <- read.table("train/Y_train.txt")
 # ytrain is 7352 x 1 
 ytest <- read.table("test/Y_test.txt")
 # ytest is 2947 x 1 
 
-ytl <- rbind(ytrain, ytest)
+ydf <- rbind(ytrain, ytest)
 # We want y as a vector, but rbind has given us a data frame
 # so we need to de-list it.
-yt <- ytl[[1]]
+y <- ydf[[1]]
 
 # Step 1 completed.
-# xt is 10299 x 562, yt is 10299 x 1
+# x is 10299 x 562, y is 10299 x 1
 
 
 #
-# --------
-# Step 2: Take only the columns that are mean or std deviation
+# I know this seems out of order, but...
 #
-
-f <- read.table("features.txt")
-
-# We really only want certain features,
-# those with -mean() or -std() in the name.
-# use is a list of the numbers of the columns of X 
-# that we want to use
-use <- sort(union(grep("-mean\\()", f[, 2]), grep("-std\\()", f[, 2])))
-
-
-# All the rows have moved over 1 for subject, so, 
-# add 1 to everything in use
-use <- use + 1
-
-# In addition to the columns we just chose, we also want
-# to include the subjectId, column 1.
-xTrim <-xt[ ,c(1, use)]
-# We're trimming columns of xt, not rows, 
-# so we don't need to trim yt (which is a single colum vector)
-
-#Let's keep the feature names of the columns we used 
-used_f <- f[use,]
-n_used <- nrow(used_f)
-
-# Step 4: Meaningful Column Names
-# because we need to look at the Column meanings to determine
+# Step 4: Appropriately labels the data set with descriptive variable names. 
+#
+# We need to look at the Column meanings (features) to determine
 # what to keep for Step 2, so why not apply the variable/column names 
 # as soon as we know them?
 
-# Let's get the column names for xt
+# Let's get the column names for x
 # by taking the meanings out of features.txt
 # and getting rid of punctuation, which doesn't 
 # make good column names
 
+f <- read.table("features.txt")
+n_feat <- nrow(f)
 
-clean <- rep(0, n_used)
-for (i in 1:n_used) {
+clean <- rep(0, n_feat)
+for (i in 1:n_feat) {
     # The punctuations we need to remove are parens and comma
-    a        <- gsub("(", "", used_f[i,2], fixed = TRUE)
+    a        <- gsub("(", "", f[i,2], fixed = TRUE)
     b        <- gsub(")", "",  a, fixed = TRUE)
     c        <- gsub("-", ".", b, fixed = TRUE)
     clean[i] <- gsub(",", "",  c, fixed = TRUE)
 }
 
-# Let's label our overall xt dataset
+# Let's label our overall x dataset
 # The first column is the subject_id we pasted on
 # The rest are the cleaned up names we made above
-colnames(xt) <- c("subject_id",clean[use])
+colnames(X) <- c("subject_id",clean)
 
+#
+# Step 2: Extracts only the measurements on the mean and standard deviation for each measurement. 
+#
+# I interpreted this to mean features that ended in -mean() or -std(), but *not* -meanFreq()
+#
+# Since we did step 4 already, we can now use select:
+#
+
+X_trimmed <- select(X, matches("subject_id"), contains("mean"), contains("std"), -contains("meanFreq"))
 
 
 #
-# --------
-# Step 3: Put meaningful labels on activities
-# I took this to mean, translate the numerical 1-6 for which 
-# physical activity, into the word for what the subjeect
-# was doing
+# Step 3: Uses descriptive activity names to name the activities in the data set
+# 
+# I took this to mean, translate the numerical 1-6 in y_train and y_test, 
+# which stands for which physical activity, 
+# into the word for what the subject was doing
 
-setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
 # activity_labels.txt: "Links the class labels with their activity name."
 y_meanings <- read.table("activity_labels.txt")
 
-yt_desc <- data.frame(y_meanings$V2[yt])
-names(ytl) <- "numericActivity"
-names(yt_desc) <- "Activity"
+y_desc <- data.frame(y_meanings$V2[y])
+names(y_desc) <- "activity"
 
-# The rows of yt_desc go with the rows of the dataset
+# The rows of y_desc go with the rows of the dataset
 # As we have not changed row order
-dataset <- cbind(xTrim, ytl, yt_desc)
+dataset <- cbind(X_trimmed, y_desc)
 
 #We have now completed Step 1 - 4
 write.csv(dataset, "step4.csv")
 
 
-# Some things I tried that I don't think I'll be using 
-# but I'm not ready to throw away yet
 
-#ii <- interaction(dataset$subject_id, dataset$numericActivity)
-#s <- split(dataset,ii)
-numericDataset <- cbind(xTrim, ytl)
-s <- split(numericDataset,list(dataset$subject_id, dataset$numericActivity))
-datameans <- t(sapply(s, colMeans))
-#Ugh, adding the Activity which is strings screws up colMeans
-# but now I've doubled our memory usage 
-# and I still have to reapply the Activity names
-
-xX <- xtabs(tBodyAcc.mean.X ~ subject_id + Activity, data = dataset)
-colMeans(xX)
-xZ <- xtabs(tBodyAcc.mean.Z ~ subject_id + Activity, data = dataset)
-colMeans(xZ)
-
-
-
-#Step 5
+#
 # Step 5: From the data set in step 4, creates a second, independent 
 #  tidy data set with the average of each variable for each activity and each subject.
+#
+#  Now we get to the real tidying!
+#
 
-molten_data <- melt(dataset,id.vars=c("subject_id","Activity"))
-library(reshape)
-tidy_dataset <- cast(molten, variable  + Activity + subject_id ~ ., mean)
-write.csv(tidy_dataset, "tidy.csv")
-
-try_this <- cast(molten, variable ~ subject_id | Activity, mean)
-
-try_this_2 <- cast(molten, Activity ~ variable | subject_id , mean)
-# I think I like the first one better
+molten_data <- melt(dataset,id.vars=c("subject_id","activity"))
 
 
+# I think I like this one best
+tidy_dataset <- cast(molten_data, variable ~ subject_id | activity, mean)
+
+# These weren't great
+first_try <- cast(molten_data, variable  + activity + subject_id ~ ., mean)
+try_this_2 <- cast(molten_data, activity ~ variable | subject_id , mean)
+
+# *but*, we need it to be flat.  We need a melted form of that cast
+
+grouped <- molten_data %>% group_by(subject_id, Activity) 
+#%>% summarize(mean(.))
+
+mean_values <- molten_data %>% group_by(subject_id, Activity, variable) %>% summarise(mean(value))
+
+write.table(mean_values, "tidy.txt", row.names = FALSE)

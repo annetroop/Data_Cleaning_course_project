@@ -2,6 +2,23 @@
 
 ## Variables
 
+### Subject_id
+
+Identifies which volunteer the data comes from.
+
+### activity
+
+Identifies what physical activity the volunteer was performing at the time of these measurements.
+
+### Variables
+
+Variable is the name of one of the original measurement types which was already a mean or standard deviation.  (I interpreted meanFreq to not be a mean of a measurement and did not include those.)  
+
+### mean(value)
+
+The fourth
+
+
 ###Acceleration
 * Acceleration-X
 * Acceleration-Y
