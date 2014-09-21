@@ -1,20 +1,28 @@
+library(dplyr)
+library(tidyr)
 #
 # Step 1: Merge train and test into one data sets
+#
+# I interpretted this to also be the right time to add
+# subject_id to each row
 #
 
 setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
 
 # Read the train data
-xtrain <- read.table("train/X_train.txt")
 # is 7352 x 561
+xtrain <- read.table("train/X_train.txt")
 # Attach the subject id to each row in train, too
 strain <- read.table("train/subject_train.txt")
+
+
 names(strain) <- c("subject_id")
 xtrain <- cbind(strain, xtrain)
 
 # Read the test data
+# which is 2947 x 561
 xtest <- read.table("test/X_test.txt")
-# is 2947 x 561
+
 # Attach the subject id to each row
 stest <- read.table("test/subject_test.txt")
 names(stest) <- c("subject_id")
@@ -23,12 +31,13 @@ xtest <- cbind(stest, xtest)
 # Now let's put train and test together
 xt <- rbind(xtrain, xtest)
 
+X <- tbl_df(xt)
 
 ytrain <- read.table("train/Y_train.txt")
-# is 7352 x 1 
+# ytrain is 7352 x 1 
 ytest <- read.table("test/Y_test.txt")
-# is 2947 x 1 
-# For logistical regression, this would be the desired outputs
+# ytest is 2947 x 1 
+
 ytl <- rbind(ytrain, ytest)
 # We want y as a vector, but rbind has given us a data frame
 # so we need to de-list it.
@@ -59,7 +68,8 @@ use <- use + 1
 # In addition to the columns we just chose, we also want
 # to include the subjectId, column 1.
 xTrim <-xt[ ,c(1, use)]
-# We're trimming columns of xt, not rows, so we don't need to trim yt
+# We're trimming columns of xt, not rows, 
+# so we don't need to trim yt (which is a single colum vector)
 
 #Let's keep the feature names of the columns we used 
 used_f <- f[use,]
@@ -70,7 +80,7 @@ n_used <- nrow(used_f)
 # what to keep for Step 2, so why not apply the variable/column names 
 # as soon as we know them?
 
-# Let's get the column names for X_test.txt
+# Let's get the column names for xt
 # by taking the meanings out of features.txt
 # and getting rid of punctuation, which doesn't 
 # make good column names
@@ -135,6 +145,8 @@ colMeans(xZ)
 
 
 #Step 5
+# Step 5: From the data set in step 4, creates a second, independent 
+#  tidy data set with the average of each variable for each activity and each subject.
 
 molten_data <- melt(dataset,id.vars=c("subject_id","Activity"))
 library(reshape)
@@ -143,6 +155,7 @@ write.csv(tidy_dataset, "tidy.csv")
 
 try_this <- cast(molten, variable ~ subject_id | Activity, mean)
 
-
+try_this_2 <- cast(molten, Activity ~ variable | subject_id , mean)
+# I think I like the first one better
 
 
