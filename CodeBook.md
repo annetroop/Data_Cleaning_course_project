@@ -149,13 +149,11 @@ The Euclidean norm of the Gyro Jerk (derivative of Gyro) measurement variable.
 * "fBodyAccMag-std"
 * "fBodyAccMag-meanFreq"         
 
-uh, what?  what's BodyBody mean???
+### I officially have no clue what BodyBody means
 * "fBodyBodyAccJerkMag-mean"
 * "fBodyBodyAccJerkMag-std"       
-
 * "fBodyBodyGyroMag-mean"        
 * "fBodyBodyGyroMag-std"          
-
 * "fBodyBodyGyroJerkMag-mean"
 * "fBodyBodyGyroJerkMag-std"     
 
