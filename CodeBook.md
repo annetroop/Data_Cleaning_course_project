@@ -40,7 +40,7 @@ Variable is the name of one of the original measurement types which was already 
 
 ### mean(value)
 
-The fourth column in the data set is the mean value for the set of observations of variable for the given subject_id and activity. (Even if that's the mean of a set of observed  standard deviations, for variables named with "std", such as for tBodyGyro.std.X.)
+The fourth column in the data set is the mean value for the set of observations of variable for the given subject_id and activity. (Even if that's the mean of a set of observed  standard deviations, for variables named with "std", such as for tBodyGyro.std.X.)  There is no unit because the observations had been normalized.
 
 ## Expanded commentary on the variables occurring in the "variable" column
 
@@ -173,7 +173,7 @@ The Euclidean norm of the Gyro Jerk (derivative of Gyro) measurement variable.
 * "fBodyAccMag-std"
 * "fBodyAccMag-meanFreq"         
 
-### I officially have no clue what BodyBody means
+### More Magnitudes of Body Acceleration and Gyroscopic Motion
 * "fBodyBodyAccJerkMag-mean"
 * "fBodyBodyAccJerkMag-std"       
 * "fBodyBodyGyroMag-mean"        
