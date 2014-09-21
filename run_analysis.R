@@ -12,7 +12,11 @@ library(reshape)
 # where X is a matrix and y is the outputs we hope to match
 #
 
-setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
+# Run this from the "UCI HAR Dataset" directory 
+# wherever you've downloaded it
+# Mine was here:
+#setwd("C:\\coursera\\cleaning\\UCI HAR Dataset")
+
 
 # Read the train data
 # which is 7352 x 561
@@ -32,14 +36,12 @@ stest <- read.table("test/subject_test.txt")
 names(stest) <- c("subject_id")
 xtest <- cbind(stest, xtest)
 
-# Now let's put train and test together
+# Put train and test together for X
 X <- rbind(xtrain, xtest)
 
+#Let's get y and put it together 
 ytrain <- read.table("train/Y_train.txt")
-# ytrain is 7352 x 1 
 ytest <- read.table("test/Y_test.txt")
-# ytest is 2947 x 1 
-
 ydf <- rbind(ytrain, ytest)
 # We want y as a vector, but rbind has given us a data frame
 # so we need to de-list it.
@@ -57,9 +59,13 @@ y <- ydf[[1]]
 # We need to look at the Column meanings (features) to determine
 # what to keep for Step 2, so why not apply the variable/column names 
 # as soon as we know them?
-
-# Let's get the column names for x
-# by taking the meanings out of features.txt
+#
+# I did come up with an alternative way to do Step 2 first using grep to get a 
+# list of feature numbers that corresponded to column numbers in the dataset, 
+# but it was not as elegant as using "select".
+#
+# We can get column names for x
+# by taking the meanings of the columns out of features.txt
 # and getting rid of punctuation, which doesn't 
 # make good column names
 
@@ -97,8 +103,14 @@ X_trimmed <- select(X, matches("subject_id"), contains("mean"), contains("std"),
 # I took this to mean, translate the numerical 1-6 in y_train and y_test, 
 # which stands for which physical activity, 
 # into the word for what the subject was doing
+#
+# activity_labels.txt is described as "Links the class labels with their activity name."
+# which means it is a 6 x 2 matrix of which the first column is a number 
+# and the second column is the name of the activity which that number indicates
+# when it shows up in y.  Thus y_meanings$V2[y] maps each number in y to the 
+# matching activity description.
+#
 
-# activity_labels.txt: "Links the class labels with their activity name."
 y_meanings <- read.table("activity_labels.txt")
 
 y_desc <- data.frame(y_meanings$V2[y])
@@ -122,19 +134,6 @@ write.csv(dataset, "step4.csv")
 
 molten_data <- melt(dataset,id.vars=c("subject_id","activity"))
 
-
-# I think I like this one best
-tidy_dataset <- cast(molten_data, variable ~ subject_id | activity, mean)
-
-# These weren't great
-first_try <- cast(molten_data, variable  + activity + subject_id ~ ., mean)
-try_this_2 <- cast(molten_data, activity ~ variable | subject_id , mean)
-
-# *but*, we need it to be flat.  We need a melted form of that cast
-
-grouped <- molten_data %>% group_by(subject_id, Activity) 
-#%>% summarize(mean(.))
-
-mean_values <- molten_data %>% group_by(subject_id, Activity, variable) %>% summarise(mean(value))
+mean_values <- molten_data %>% group_by(subject_id, activity, variable) %>% summarise(mean(value))
 
 write.table(mean_values, "tidy.txt", row.names = FALSE)
